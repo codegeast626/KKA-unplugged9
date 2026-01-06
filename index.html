@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pertualangan Koding - Game Edukasi</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/_sdk/element_sdk.js"></script>
-  <script src="/_sdk/data_sdk.js"></script>
   <style>
     body {
       box-sizing: border-box;
@@ -206,11 +204,13 @@
     }
   </style>
   <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
  </head>
- <body class="h-full">
+ <body class="h-full bg-indigo-100">
   <div id="app" class="w-full h-full overflow-auto"></div>
   <script>
-    const defaultConfig = {
+    const config = {
       background_color: "#e0e7ff",
       surface_color: "#ffffff",
       text_color: "#1e293b",
@@ -398,165 +398,55 @@
       }
     };
 
-    const dataHandler = {
-      onDataChanged(data) {
-        progressData = data || [];
-        updateProgressDisplay();
+    // Load progress from localStorage
+    function loadProgress() {
+      const saved = localStorage.getItem('codingGameProgress');
+      if (saved) {
+        progressData = JSON.parse(saved);
       }
-    };
+    }
 
-    async function initApp() {
-      const sdkResult = await window.dataSdk.init(dataHandler);
-      if (!sdkResult.isOk) {
-        console.error("SDK initialization failed");
-      }
+    // Save progress to localStorage
+    function saveProgressToStorage(stars) {
+      const progressRecord = {
+        level: currentLevel,
+        stars: stars,
+        attempts: attempts,
+        blocks_used: workspace.length,
+        completed_at: new Date().toISOString()
+      };
       
-      if (window.elementSdk) {
-        window.elementSdk.init({
-          defaultConfig,
-          onConfigChange,
-          mapToCapabilities,
-          mapToEditPanelValues
-        });
-      }
-      
+      progressData.push(progressRecord);
+      localStorage.setItem('codingGameProgress', JSON.stringify(progressData));
+      updateProgressDisplay();
+    }
+
+    function initApp() {
+      loadProgress();
       render();
     }
 
-    async function onConfigChange(config) {
-      const customFont = config.font_family || defaultConfig.font_family;
-      const baseFontStack = 'system-ui, -apple-system, sans-serif';
-      const baseSize = config.font_size || defaultConfig.font_size;
-      
-      document.body.style.backgroundColor = config.background_color || defaultConfig.background_color;
-      document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
-      
-      const allText = document.querySelectorAll('.text-element');
-      allText.forEach(el => {
-        el.style.fontFamily = `${customFont}, ${baseFontStack}`;
-      });
-      
-      const titles = document.querySelectorAll('.title-text');
-      titles.forEach(el => {
-        el.style.fontSize = `${baseSize * 1.5}px`;
-        el.style.color = config.text_color || defaultConfig.text_color;
-      });
-      
-      const bodyTexts = document.querySelectorAll('.body-text');
-      bodyTexts.forEach(el => {
-        el.style.fontSize = `${baseSize}px`;
-        el.style.color = config.text_color || defaultConfig.text_color;
-      });
-      
-      const surfaces = document.querySelectorAll('.surface');
-      surfaces.forEach(el => {
-        el.style.backgroundColor = config.surface_color || defaultConfig.surface_color;
-      });
-      
-      const primaryButtons = document.querySelectorAll('.primary-button');
-      primaryButtons.forEach(el => {
-        el.style.backgroundColor = config.primary_action_color || defaultConfig.primary_action_color;
-      });
-      
-      const secondaryButtons = document.querySelectorAll('.secondary-button');
-      secondaryButtons.forEach(el => {
-        el.style.backgroundColor = config.secondary_action_color || defaultConfig.secondary_action_color;
-      });
-      
-      const gameTitle = document.getElementById('game-title');
-      if (gameTitle) {
-        gameTitle.textContent = config.game_title || defaultConfig.game_title;
-      }
-    }
-
-    function mapToCapabilities(config) {
-      return {
-        recolorables: [
-          {
-            get: () => config.background_color || defaultConfig.background_color,
-            set: (value) => {
-              config.background_color = value;
-              if (window.elementSdk) window.elementSdk.setConfig({ background_color: value });
-            }
-          },
-          {
-            get: () => config.surface_color || defaultConfig.surface_color,
-            set: (value) => {
-              config.surface_color = value;
-              if (window.elementSdk) window.elementSdk.setConfig({ surface_color: value });
-            }
-          },
-          {
-            get: () => config.text_color || defaultConfig.text_color,
-            set: (value) => {
-              config.text_color = value;
-              if (window.elementSdk) window.elementSdk.setConfig({ text_color: value });
-            }
-          },
-          {
-            get: () => config.primary_action_color || defaultConfig.primary_action_color,
-            set: (value) => {
-              config.primary_action_color = value;
-              if (window.elementSdk) window.elementSdk.setConfig({ primary_action_color: value });
-            }
-          },
-          {
-            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
-            set: (value) => {
-              config.secondary_action_color = value;
-              if (window.elementSdk) window.elementSdk.setConfig({ secondary_action_color: value });
-            }
-          }
-        ],
-        borderables: [],
-        fontEditable: {
-          get: () => config.font_family || defaultConfig.font_family,
-          set: (value) => {
-            config.font_family = value;
-            if (window.elementSdk) window.elementSdk.setConfig({ font_family: value });
-          }
-        },
-        fontSizeable: {
-          get: () => config.font_size || defaultConfig.font_size,
-          set: (value) => {
-            config.font_size = value;
-            if (window.elementSdk) window.elementSdk.setConfig({ font_size: value });
-          }
-        }
-      };
-    }
-
-    function mapToEditPanelValues(config) {
-      return new Map([
-        ["game_title", config.game_title || defaultConfig.game_title],
-        ["character_name", config.character_name || defaultConfig.character_name],
-        ["success_message", config.success_message || defaultConfig.success_message],
-        ["hint_message", config.hint_message || defaultConfig.hint_message]
-      ]);
-    }
-
     function showGameOver() {
-      const config = window.elementSdk?.config || defaultConfig;
       const app = document.getElementById('app');
       
       app.innerHTML = `
         <div class="w-full h-full flex items-center justify-center p-6" style="background-color: ${config.background_color};">
           <div class="max-w-2xl w-full">
-            <div class="surface rounded-2xl p-8 shadow-2xl text-center" style="background-color: ${config.surface_color};">
-              <div style="font-size: ${(config.font_size || 16) * 4}px;" class="mb-4">😢</div>
-              <h2 class="title-text text-element font-bold mb-4" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 2}px;">
+            <div class="rounded-2xl p-8 shadow-2xl text-center" style="background-color: ${config.surface_color};">
+              <div style="font-size: ${config.font_size * 4}px;" class="mb-4">😢</div>
+              <h2 class="font-bold mb-4" style="color: ${config.text_color}; font-size: ${config.font_size * 2}px;">
                 Game Over!
               </h2>
-              <p class="body-text text-element mb-6" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1.1}px;">
+              <p class="mb-6" style="color: ${config.text_color}; font-size: ${config.font_size * 1.1}px;">
                 Nyawa kamu habis! Jangan menyerah, coba lagi dari awal.
               </p>
               <div class="mb-6 p-4 rounded-lg" style="background-color: rgba(59, 130, 246, 0.2);">
-                <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.95}px;">
+                <p style="color: ${config.text_color}; font-size: ${config.font_size * 0.95}px;">
                   Kamu mencapai <strong>Level ${currentLevel}</strong><br>
                   Total percobaan: <strong>${attempts}</strong>
                 </p>
               </div>
-              <button id="restart-game" class="px-12 py-4 rounded-xl font-bold body-text text-element transition-all hover:opacity-80" style="background-color: ${config.primary_action_color}; color: white; font-size: ${(config.font_size || 16) * 1.2}px;">
+              <button id="restart-game" class="px-12 py-4 rounded-xl font-bold transition-all hover:opacity-80" style="background-color: ${config.primary_action_color}; color: white; font-size: ${config.font_size * 1.2}px;">
                 🔄 Mulai Permainan Baru
               </button>
             </div>
@@ -585,43 +475,42 @@
         return;
       }
       
-      const config = window.elementSdk?.config || defaultConfig;
       const level = levels[currentLevel];
       
       const app = document.getElementById('app');
       app.innerHTML = `
         <div class="w-full min-h-full p-2 md:p-3" style="background-color: ${config.background_color};">
           <div class="max-w-7xl mx-auto">
-            <!-- Header & Level Info - Compact Landscape -->
-            <div class="surface rounded-xl p-3 mb-4 shadow-lg" style="background-color: ${config.surface_color};">
+            <!-- Header & Level Info -->
+            <div class="rounded-xl p-3 mb-4 shadow-lg" style="background-color: ${config.surface_color};">
               <div class="flex flex-wrap justify-between items-center gap-3">
                 <div>
-                  <h1 id="game-title" class="title-text text-element font-bold" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1.2}px;">
+                  <h1 id="game-title" class="font-bold" style="color: ${config.text_color}; font-size: ${config.font_size * 1.2}px;">
                     ${config.game_title} - ${level.title}
                   </h1>
-                  <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.8}px;">
+                  <p style="color: ${config.text_color}; font-size: ${config.font_size * 0.8}px;">
                     ${level.description}
                   </p>
                 </div>
                 <div class="flex gap-2 items-center flex-wrap">
-                  <div class="body-text text-element px-2.5 py-1 rounded-full" style="background-color: rgba(239, 68, 68, 0.3); color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.75}px;">
+                  <div class="px-2.5 py-1 rounded-full" style="background-color: rgba(239, 68, 68, 0.3); color: ${config.text_color}; font-size: ${config.font_size * 0.75}px;">
                     ❤️ ${lives}
                   </div>
-                  <div class="body-text text-element px-2.5 py-1 rounded-full" style="background-color: rgba(59, 130, 246, 0.3); color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.75}px;">
+                  <div class="px-2.5 py-1 rounded-full" style="background-color: rgba(59, 130, 246, 0.3); color: ${config.text_color}; font-size: ${config.font_size * 0.75}px;">
                     Maks: ${level.maxBlocks}
                   </div>
-                  <div class="body-text text-element px-2.5 py-1 rounded-full" style="background-color: rgba(245, 158, 11, 0.3); color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.75}px;">
+                  <div class="px-2.5 py-1 rounded-full" style="background-color: rgba(245, 158, 11, 0.3); color: ${config.text_color}; font-size: ${config.font_size * 0.75}px;">
                     Try: ${attempts}
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Main Game Area - Responsive Layout -->
+            <!-- Main Game Area -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-              <!-- Game Grid - Left/Top Side -->
-              <div class="surface rounded-xl p-4 shadow-lg" style="background-color: ${config.surface_color};">
-                <h3 class="title-text text-element font-bold mb-3" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1}px;">
+              <!-- Game Grid -->
+              <div class="rounded-xl p-4 shadow-lg" style="background-color: ${config.surface_color};">
+                <h3 class="font-bold mb-3" style="color: ${config.text_color}; font-size: ${config.font_size * 1}px;">
                   🎮 Arena Permainan
                 </h3>
                 <div class="flex justify-center items-center">
@@ -629,15 +518,15 @@
                 </div>
               </div>
 
-              <!-- Workspace - Right/Bottom Side -->
-              <div class="surface rounded-xl p-4 shadow-lg" style="background-color: ${config.surface_color};">
-                <h3 class="title-text text-element font-bold mb-3" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1}px;">
+              <!-- Workspace -->
+              <div class="rounded-xl p-4 shadow-lg" style="background-color: ${config.surface_color};">
+                <h3 class="font-bold mb-3" style="color: ${config.text_color}; font-size: ${config.font_size * 1}px;">
                   🧩 Area Kerja Algoritma
                 </h3>
                 
                 <!-- Available Blocks -->
                 <div class="mb-3">
-                  <p class="body-text text-element mb-2" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.8}px;">
+                  <p class="mb-2" style="color: ${config.text_color}; font-size: ${config.font_size * 0.8}px;">
                     Blok Perintah:
                   </p>
                   <div id="block-palette" class="flex flex-wrap gap-1.5"></div>
@@ -645,7 +534,7 @@
 
                 <!-- Drop Zone -->
                 <div class="mb-3">
-                  <p id="workspace-counter" class="body-text text-element mb-2" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.8}px;">
+                  <p id="workspace-counter" class="mb-2" style="color: ${config.text_color}; font-size: ${config.font_size * 0.8}px;">
                     Susun perintah (${workspace.length}/${level.maxBlocks}):
                   </p>
                   <div id="workspace" class="drop-zone border-2 border-dashed rounded-lg p-3 min-h-24" style="border-color: rgba(59, 130, 246, 0.3);"></div>
@@ -653,13 +542,13 @@
 
                 <!-- Action Buttons -->
                 <div class="flex flex-wrap gap-2 mb-3">
-                  <button id="run-btn" class="primary-button px-5 py-2.5 rounded-lg font-bold body-text text-element transition-all hover:opacity-80" style="background-color: ${config.primary_action_color}; color: white; font-size: ${(config.font_size || 16) * 0.9}px;">
+                  <button id="run-btn" class="px-5 py-2.5 rounded-lg font-bold transition-all hover:opacity-80" style="background-color: ${config.primary_action_color}; color: white; font-size: ${config.font_size * 0.9}px;">
                     ▶ Jalankan
                   </button>
-                  <button id="reset-btn" class="secondary-button px-5 py-2.5 rounded-lg font-bold body-text text-element transition-all hover:opacity-80" style="background-color: ${config.secondary_action_color}; color: white; font-size: ${(config.font_size || 16) * 0.9}px;">
+                  <button id="reset-btn" class="px-5 py-2.5 rounded-lg font-bold transition-all hover:opacity-80" style="background-color: ${config.secondary_action_color}; color: white; font-size: ${config.font_size * 0.9}px;">
                     ↺ Reset
                   </button>
-                  <button id="clear-btn" class="px-5 py-2.5 rounded-lg font-bold body-text text-element transition-all hover:opacity-80" style="background-color: rgba(239, 68, 68, 0.8); color: white; font-size: ${(config.font_size || 16) * 0.9}px;">
+                  <button id="clear-btn" class="px-5 py-2.5 rounded-lg font-bold transition-all hover:opacity-80" style="background-color: rgba(239, 68, 68, 0.8); color: white; font-size: ${config.font_size * 0.9}px;">
                     🗑 Hapus
                   </button>
                 </div>
@@ -669,9 +558,9 @@
               </div>
             </div>
 
-            <!-- Progress Display - Compact -->
-            <div class="surface rounded-xl p-3 shadow-lg" style="background-color: ${config.surface_color};">
-              <h3 class="title-text text-element font-bold mb-2" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.95}px;">
+            <!-- Progress Display -->
+            <div class="rounded-xl p-3 shadow-lg" style="background-color: ${config.surface_color};">
+              <h3 class="font-bold mb-2" style="color: ${config.text_color}; font-size: ${config.font_size * 0.95}px;">
                 📊 Progres
               </h3>
               <div id="progress-display" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2"></div>
@@ -688,39 +577,37 @@
     }
 
     function renderIntro() {
-      const config = window.elementSdk?.config || defaultConfig;
       const app = document.getElementById('app');
       
       if (tutorialStep === 0) {
-        // Welcome screen
         app.innerHTML = `
           <div class="w-full h-full flex items-center justify-center p-6" style="background: linear-gradient(135deg, ${config.background_color} 0%, #1e3a8a 100%);">
             <div class="max-w-3xl w-full text-center">
-              <div class="intro-title mb-8" style="font-size: ${(config.font_size || 16) * 3}px;">
+              <div class="intro-title mb-8" style="font-size: ${config.font_size * 3}px;">
                 🤖
               </div>
-              <h1 class="intro-title title-text text-element font-bold mb-4" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 2.5}px;">
+              <h1 class="intro-title font-bold mb-4" style="color: ${config.text_color}; font-size: ${config.font_size * 2.5}px;">
                 ${config.game_title}
               </h1>
-              <p class="intro-subtitle body-text text-element mb-8" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1.2}px; opacity: 0.9;">
+              <p class="intro-subtitle mb-8" style="color: ${config.text_color}; font-size: ${config.font_size * 1.2}px; opacity: 0.9;">
                 Selamat datang di dunia pemrograman visual! <br>
                 Bantu <strong>${config.character_name}</strong> mencapai bintang dengan menyusun algoritma yang tepat.
               </p>
               <div class="intro-subtitle mb-8 flex justify-center gap-8 flex-wrap">
                 <div class="text-center">
-                  <div style="font-size: ${(config.font_size || 16) * 2}px;" class="mb-2">🎯</div>
-                  <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.9}px;">7 Level Seru</p>
+                  <div style="font-size: ${config.font_size * 2}px;" class="mb-2">🎯</div>
+                  <p style="color: ${config.text_color}; font-size: ${config.font_size * 0.9}px;">7 Level Seru</p>
                 </div>
                 <div class="text-center">
-                  <div style="font-size: ${(config.font_size || 16) * 2}px;" class="mb-2">🧩</div>
-                  <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.9}px;">Blok Perintah</p>
+                  <div style="font-size: ${config.font_size * 2}px;" class="mb-2">🧩</div>
+                  <p style="color: ${config.text_color}; font-size: ${config.font_size * 0.9}px;">Blok Perintah</p>
                 </div>
                 <div class="text-center">
-                  <div style="font-size: ${(config.font_size || 16) * 2}px;" class="mb-2">👾</div>
-                  <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.9}px;">Hindari Monster</p>
+                  <div style="font-size: ${config.font_size * 2}px;" class="mb-2">👾</div>
+                  <p style="color: ${config.text_color}; font-size: ${config.font_size * 0.9}px;">Hindari Monster</p>
                 </div>
               </div>
-              <button id="start-tutorial" class="intro-button px-12 py-4 rounded-xl font-bold body-text text-element transition-all hover:opacity-80" style="background-color: ${config.primary_action_color}; color: white; font-size: ${(config.font_size || 16) * 1.2}px;">
+              <button id="start-tutorial" class="intro-button px-12 py-4 rounded-xl font-bold transition-all hover:opacity-80" style="background-color: ${config.primary_action_color}; color: white; font-size: ${config.font_size * 1.2}px;">
                 🚀 Mulai Petualangan
               </button>
             </div>
@@ -737,53 +624,50 @@
           }, 150);
         });
       } else if (tutorialStep === 1) {
-        // Tutorial step 1: Movement
         app.innerHTML = `
           <div class="w-full h-full flex items-center justify-center p-6" style="background-color: ${config.background_color};">
             <div class="max-w-4xl w-full">
-              <div class="surface rounded-2xl p-8 shadow-2xl tutorial-step" style="background-color: ${config.surface_color};">
-                <h2 class="title-text text-element font-bold mb-6 text-center" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1.8}px;">
+              <div class="rounded-2xl p-8 shadow-2xl tutorial-step" style="background-color: ${config.surface_color};">
+                <h2 class="font-bold mb-6 text-center" style="color: ${config.text_color}; font-size: ${config.font_size * 1.8}px;">
                   📚 Cara Bermain - Langkah 1
                 </h2>
                 
                 <div class="grid md:grid-cols-2 gap-8 mb-8">
-                  <!-- Visual Demo -->
                   <div class="flex flex-col items-center justify-center p-6 rounded-xl" style="background-color: rgba(59, 130, 246, 0.1);">
-                    <div class="mb-4" style="font-size: ${(config.font_size || 16) * 4}px;">
+                    <div class="mb-4" style="font-size: ${config.font_size * 4}px;">
                       <span class="tutorial-robot">🤖</span> <span style="opacity: 0.3;">→ → →</span> <span>⭐</span>
                     </div>
-                    <p class="body-text text-element text-center" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1.1}px;">
+                    <p class="text-center" style="color: ${config.text_color}; font-size: ${config.font_size * 1.1}px;">
                       Robot bergerak menuju bintang
                     </p>
                   </div>
                   
-                  <!-- Instructions -->
                   <div class="flex flex-col justify-center">
                     <div class="mb-4 flex items-start gap-3">
-                      <div class="px-3 py-2 rounded-lg font-bold" style="background-color: #3b82f6; color: white; font-size: ${(config.font_size || 16) * 0.9}px;">
+                      <div class="px-3 py-2 rounded-lg font-bold" style="background-color: #3b82f6; color: white; font-size: ${config.font_size * 0.9}px;">
                         → Maju
                       </div>
-                      <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.95}px;">
+                      <p style="color: ${config.text_color}; font-size: ${config.font_size * 0.95}px;">
                         Gerakkan robot satu kotak ke depan
                       </p>
                     </div>
                     <div class="mb-4 flex items-start gap-3">
-                      <div class="px-3 py-2 rounded-lg font-bold" style="background-color: #8b5cf6; color: white; font-size: ${(config.font_size || 16) * 0.9}px;">
+                      <div class="px-3 py-2 rounded-lg font-bold" style="background-color: #8b5cf6; color: white; font-size: ${config.font_size * 0.9}px;">
                         ↰ ↱ Belok
                       </div>
-                      <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.95}px;">
+                      <p style="color: ${config.text_color}; font-size: ${config.font_size * 0.95}px;">
                         Putar robot ke kiri atau kanan
                       </p>
                     </div>
                     <div class="p-4 rounded-lg" style="background-color: rgba(245, 158, 11, 0.2);">
-                      <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.9}px;">
+                      <p style="color: ${config.text_color}; font-size: ${config.font_size * 0.9}px;">
                         💡 <strong>Tips:</strong> Seret blok perintah ke area kerja dan susun urutannya!
                       </p>
                     </div>
                   </div>
                 </div>
                 
-                <button id="next-step" class="w-full px-8 py-4 rounded-xl font-bold body-text text-element transition-all hover:opacity-80" style="background-color: ${config.primary_action_color}; color: white; font-size: ${(config.font_size || 16) * 1.1}px;">
+                <button id="next-step" class="w-full px-8 py-4 rounded-xl font-bold transition-all hover:opacity-80" style="background-color: ${config.primary_action_color}; color: white; font-size: ${config.font_size * 1.1}px;">
                   Lanjut ➜
                 </button>
               </div>
@@ -801,61 +685,58 @@
           }, 150);
         });
       } else if (tutorialStep === 2) {
-        // Tutorial step 2: Obstacles
         app.innerHTML = `
           <div class="w-full h-full flex items-center justify-center p-6" style="background-color: ${config.background_color};">
             <div class="max-w-4xl w-full">
-              <div class="surface rounded-2xl p-8 shadow-2xl tutorial-step" style="background-color: ${config.surface_color};">
-                <h2 class="title-text text-element font-bold mb-6 text-center" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1.8}px;">
+              <div class="rounded-2xl p-8 shadow-2xl tutorial-step" style="background-color: ${config.surface_color};">
+                <h2 class="font-bold mb-6 text-center" style="color: ${config.text_color}; font-size: ${config.font_size * 1.8}px;">
                   📚 Cara Bermain - Langkah 2
                 </h2>
                 
                 <div class="grid md:grid-cols-2 gap-8 mb-8">
-                  <!-- Visual Demo -->
                   <div class="flex flex-col items-center justify-center p-6 rounded-xl" style="background-color: rgba(239, 68, 68, 0.1);">
-                    <div class="mb-4" style="font-size: ${(config.font_size || 16) * 3.5}px;">
+                    <div class="mb-4" style="font-size: ${config.font_size * 3.5}px;">
                       🤖 <span style="opacity: 0.5;">🧱</span> <span>👾</span>
                     </div>
-                    <p class="body-text text-element text-center font-bold" style="color: #ef4444; font-size: ${(config.font_size || 16) * 1.1}px;">
+                    <p class="text-center font-bold" style="color: #ef4444; font-size: ${config.font_size * 1.1}px;">
                       Hindari Rintangan!
                     </p>
                   </div>
                   
-                  <!-- Instructions -->
                   <div class="flex flex-col justify-center gap-4">
                     <div class="p-4 rounded-lg" style="background-color: rgba(100, 100, 100, 0.2);">
                       <div class="flex items-center gap-3 mb-2">
-                        <span style="font-size: ${(config.font_size || 16) * 1.8}px;">🧱</span>
-                        <p class="body-text text-element font-bold" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1}px;">Dinding</p>
+                        <span style="font-size: ${config.font_size * 1.8}px;">🧱</span>
+                        <p class="font-bold" style="color: ${config.text_color}; font-size: ${config.font_size * 1}px;">Dinding</p>
                       </div>
-                      <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.85}px; opacity: 0.8;">
+                      <p style="color: ${config.text_color}; font-size: ${config.font_size * 0.85}px; opacity: 0.8;">
                         Tidak bisa dilewati, cari jalan lain!
                       </p>
                     </div>
                     
                     <div class="p-4 rounded-lg" style="background-color: rgba(139, 92, 246, 0.2);">
                       <div class="flex items-center gap-3 mb-2">
-                        <span style="font-size: ${(config.font_size || 16) * 1.8}px;">👾</span>
-                        <p class="body-text text-element font-bold" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1}px;">Monster</p>
+                        <span style="font-size: ${config.font_size * 1.8}px;">👾</span>
+                        <p class="font-bold" style="color: ${config.text_color}; font-size: ${config.font_size * 1}px;">Monster</p>
                       </div>
-                      <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.85}px; opacity: 0.8;">
+                      <p style="color: ${config.text_color}; font-size: ${config.font_size * 0.85}px; opacity: 0.8;">
                         Jangan menabrak! Rencanakan rute dengan hati-hati.
                       </p>
                     </div>
                     
                     <div class="p-4 rounded-xl" style="background-color: rgba(16, 185, 129, 0.2);">
                       <div class="flex items-center gap-3 mb-2">
-                        <span style="font-size: ${(config.font_size || 16) * 1.8}px;">⟲</span>
-                        <p class="body-text text-element font-bold" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1}px;">Loop (Ulangi)</p>
+                        <span style="font-size: ${config.font_size * 1.8}px;">⟲</span>
+                        <p class="font-bold" style="color: ${config.text_color}; font-size: ${config.font_size * 1}px;">Loop (Ulangi)</p>
                       </div>
-                      <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.85}px; opacity: 0.8;">
+                      <p style="color: ${config.text_color}; font-size: ${config.font_size * 0.85}px; opacity: 0.8;">
                         Gunakan loop untuk mengulang perintah dengan efisien!
                       </p>
                     </div>
                   </div>
                 </div>
                 
-                <button id="start-game" class="w-full px-8 py-4 rounded-xl font-bold body-text text-element transition-all hover:opacity-80" style="background-color: ${config.secondary_action_color}; color: white; font-size: ${(config.font_size || 16) * 1.1}px;">
+                <button id="start-game" class="w-full px-8 py-4 rounded-xl font-bold transition-all hover:opacity-80" style="background-color: ${config.secondary_action_color}; color: white; font-size: ${config.font_size * 1.1}px;">
                   🎮 Mulai Bermain!
                 </button>
               </div>
@@ -876,7 +757,6 @@
     }
 
     function renderGrid() {
-      const config = window.elementSdk?.config || defaultConfig;
       const level = levels[currentLevel];
       const gridContainer = document.getElementById('game-grid');
       
@@ -896,7 +776,7 @@
           
           gridHTML += `
             <div class="grid-cell" data-x="${x}" data-y="${y}" style="width: ${cellSize}px; height: ${cellSize}px; display: flex; align-items: center; justify-content: center; font-size: ${cellSize * 0.6}px; background-color: ${bgColor};">
-              ${isTarget ? '<span class="star-icon" style="animation-delay: ${Math.random()}s;">⭐</span>' : ''}
+              ${isTarget ? '<span class="star-icon" style="animation-delay: ' + Math.random() + 's;">⭐</span>' : ''}
               ${hasObstacle ? '<span style="font-size: ' + (cellSize * 0.5) + 'px;">🧱</span>' : ''}
               ${hasNPC && npc.type === 'monster' ? '<span id="npc-' + x + '-' + y + '" style="font-size: ' + (cellSize * 0.6) + 'px;">👾</span>' : ''}
             </div>
@@ -905,7 +785,6 @@
         gridHTML += '</div>';
       }
       
-      // Robot positioned absolutely
       gridHTML += `<span class="robot" id="robot" style="position: absolute; left: 0; top: 0; width: ${cellSize}px; height: ${cellSize}px; display: flex; align-items: center; justify-content: center; font-size: ${cellSize * 0.6}px; transform: translate(${level.start.x * cellSize}px, ${level.start.y * cellSize}px) rotate(${level.start.direction}deg);">🤖</span>`;
       
       gridHTML += '</div>';
@@ -914,23 +793,21 @@
     }
 
     function renderBlockPalette() {
-      const config = window.elementSdk?.config || defaultConfig;
       const level = levels[currentLevel];
       const palette = document.getElementById('block-palette');
       
       let paletteHTML = '';
       
-      // Only show blocks available for this level
       const availableBlocks = level.availableBlocks || Object.keys(blockTypes);
       
       availableBlocks.forEach(type => {
         const block = blockTypes[type];
         if (block) {
           paletteHTML += `
-            <div class="block-item px-4 py-2 rounded-lg font-bold shadow-md body-text text-element" 
+            <div class="block-item px-4 py-2 rounded-lg font-bold shadow-md" 
                  draggable="true" 
                  data-block-type="${type}"
-                 style="background-color: ${block.color}; color: white; font-size: ${(config.font_size || 16) * 0.9}px;">
+                 style="background-color: ${block.color}; color: white; font-size: ${config.font_size * 0.9}px;">
               ${block.icon} ${block.label}
             </div>
           `;
@@ -947,18 +824,16 @@
     }
 
     function renderWorkspace() {
-      const config = window.elementSdk?.config || defaultConfig;
       const level = levels[currentLevel];
       const workspaceEl = document.getElementById('workspace');
       const counterEl = document.getElementById('workspace-counter');
       
-      // Update counter
       if (counterEl) {
         counterEl.innerHTML = `Susun perintah di sini (${workspace.length}/${level.maxBlocks} blok):`;
       }
       
       if (workspace.length === 0) {
-        workspaceEl.innerHTML = `<p class="body-text text-element text-center" style="color: rgba(241, 245, 249, 0.5); font-size: ${(config.font_size || 16) * 0.9}px;">Seret blok perintah ke sini</p>`;
+        workspaceEl.innerHTML = `<p class="text-center" style="color: rgba(241, 245, 249, 0.5); font-size: ${config.font_size * 0.9}px;">Seret blok perintah ke sini</p>`;
         return;
       }
       
@@ -966,8 +841,8 @@
       workspace.forEach((blockType, index) => {
         const block = blockTypes[blockType];
         workspaceHTML += `
-          <div class="px-3 py-2 rounded-lg font-bold shadow-md flex items-center gap-2 body-text text-element" 
-               style="background-color: ${block.color}; color: white; font-size: ${(config.font_size || 16) * 0.85}px;">
+          <div class="px-3 py-2 rounded-lg font-bold shadow-md flex items-center gap-2" 
+               style="background-color: ${block.color}; color: white; font-size: ${config.font_size * 0.85}px;">
             ${block.icon} ${block.label}
             <button class="remove-block font-bold" data-index="${index}" style="color: white;">✕</button>
           </div>
@@ -1029,7 +904,6 @@
 
     function moveRobot(pos, robot, cellSize) {
       const direction = pos.direction;
-      // Arah 0 = kanan (→), 90 = bawah (↓), 180 = kiri (←), 270 = atas (↑)
       if (direction === 0) {
         pos.x++;
       } else if (direction === 90) {
@@ -1049,7 +923,6 @@
       isRunning = true;
       attempts++;
       
-      const config = window.elementSdk?.config || defaultConfig;
       const level = levels[currentLevel];
       const robot = document.getElementById('robot');
       const cellSize = Math.min(60, Math.floor(400 / level.grid));
@@ -1058,7 +931,6 @@
       
       hideFeedback();
       
-      // Helper function to check collisions
       function checkObstacle(x, y) {
         if (level.obstacles && level.obstacles.length > 0) {
           return level.obstacles.some(obs => obs.x === x && obs.y === y);
@@ -1073,7 +945,6 @@
         return false;
       }
       
-      // Execute instructions
       for (let i = 0; i < workspace.length; i++) {
         const instruction = workspace[i];
         
@@ -1087,7 +958,7 @@
             playErrorSound();
             robot.style.filter = 'brightness(0.5)';
             robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg) scale(0.8)`;
-            showFeedback('❌ Robot keluar jalur! ' + (config.hint_message || defaultConfig.hint_message) + ' | Nyawa tersisa: ' + lives, 'error');
+            showFeedback('❌ Robot keluar jalur! ' + config.hint_message + ' | Nyawa tersisa: ' + lives, 'error');
             isRunning = false;
             if (lives <= 0) {
               setTimeout(() => showGameOver(), 1500);
@@ -1115,10 +986,7 @@
           
           if (checkNPCCollision(pos.x, pos.y)) {
             lives--;
-            // Play sound IMMEDIATELY without await
             playErrorSound();
-            
-            // Then show visual effects
             createExplosionEffect(pos.x * cellSize, pos.y * cellSize);
             shakeNPC(pos.x, pos.y);
             robot.style.filter = 'hue-rotate(90deg) brightness(0.5)';
@@ -1154,7 +1022,7 @@
                   playErrorSound();
                   robot.style.filter = 'brightness(0.5)';
                   robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg) scale(0.8)`;
-                  showFeedback('❌ Robot keluar jalur! ' + (config.hint_message || defaultConfig.hint_message) + ' | Nyawa tersisa: ' + lives, 'error');
+                  showFeedback('❌ Robot keluar jalur! ' + config.hint_message + ' | Nyawa tersisa: ' + lives, 'error');
                   isRunning = false;
                   if (lives <= 0) {
                     setTimeout(() => showGameOver(), 1500);
@@ -1182,10 +1050,7 @@
                 
                 if (checkNPCCollision(pos.x, pos.y)) {
                   lives--;
-                  // Play sound IMMEDIATELY without await
                   playErrorSound();
-                  
-                  // Then show visual effects
                   createExplosionEffect(pos.x * cellSize, pos.y * cellSize);
                   shakeNPC(pos.x, pos.y);
                   robot.style.filter = 'hue-rotate(90deg) brightness(0.5)';
@@ -1207,10 +1072,9 @@
                 robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg)`;
               }
             }
-            i++; // Skip next instruction as it was executed in loop
+            i++;
           }
         } else if (instruction === 'jump') {
-          // Jump animation
           robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg) scale(1.2)`;
           await new Promise(resolve => setTimeout(resolve, 300));
           
@@ -1225,7 +1089,7 @@
             playErrorSound();
             robot.style.filter = 'brightness(0.5)';
             robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg) scale(0.8)`;
-            showFeedback('❌ Robot keluar jalur! ' + (config.hint_message || defaultConfig.hint_message) + ' | Nyawa tersisa: ' + lives, 'error');
+            showFeedback('❌ Robot keluar jalur! ' + config.hint_message + ' | Nyawa tersisa: ' + lives, 'error');
             isRunning = false;
             if (lives <= 0) {
               setTimeout(() => showGameOver(), 1500);
@@ -1253,10 +1117,7 @@
           
           if (checkNPCCollision(pos.x, pos.y)) {
             lives--;
-            // Play sound IMMEDIATELY without await
             playErrorSound();
-            
-            // Then show visual effects
             createExplosionEffect(pos.x * cellSize, pos.y * cellSize);
             shakeNPC(pos.x, pos.y);
             robot.style.filter = 'hue-rotate(90deg) brightness(0.5)';
@@ -1280,15 +1141,14 @@
       if (pos.x === level.target.x && pos.y === level.target.y) {
         const stars = workspace.length <= level.maxBlocks - 2 ? 3 : workspace.length <= level.maxBlocks - 1 ? 2 : 1;
         
-        // Trigger victory effects
         robot.classList.add('victory-robot');
         createConfetti();
         createStarBurst(pos.x * cellSize, pos.y * cellSize);
         playVictorySound();
         
-        showFeedback('🎉 ' + (config.success_message || defaultConfig.success_message) + ' ⭐'.repeat(stars), 'success');
+        showFeedback('🎉 ' + config.success_message + ' ⭐'.repeat(stars), 'success');
         
-        await saveProgress(stars);
+        saveProgressToStorage(stars);
         
         setTimeout(() => {
           if (currentLevel < Object.keys(levels).length) {
@@ -1302,7 +1162,7 @@
           }
         }, 3000);
       } else {
-        showFeedback('🤔 Belum sampai tujuan. ' + (config.hint_message || defaultConfig.hint_message), 'warning');
+        showFeedback('🤔 Belum sampai tujuan. ' + config.hint_message, 'warning');
       }
       
       isRunning = false;
@@ -1365,14 +1225,13 @@
       try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         
-        // Victory melody notes (frequencies in Hz)
         const melody = [
-          { freq: 523.25, duration: 0.15 }, // C5
-          { freq: 659.25, duration: 0.15 }, // E5
-          { freq: 783.99, duration: 0.15 }, // G5
-          { freq: 1046.50, duration: 0.3 }, // C6
-          { freq: 783.99, duration: 0.15 }, // G5
-          { freq: 1046.50, duration: 0.4 }  // C6
+          { freq: 523.25, duration: 0.15 },
+          { freq: 659.25, duration: 0.15 },
+          { freq: 783.99, duration: 0.15 },
+          { freq: 1046.50, duration: 0.3 },
+          { freq: 783.99, duration: 0.15 },
+          { freq: 1046.50, duration: 0.4 }
         ];
         
         let startTime = audioContext.currentTime;
@@ -1449,7 +1308,6 @@
     function createExplosionEffect(x, y) {
       const gridContainer = document.getElementById('game-grid');
       
-      // Main explosion emoji
       const explosion = document.createElement('div');
       explosion.style.position = 'absolute';
       explosion.style.left = (x + 15) + 'px';
@@ -1460,7 +1318,6 @@
       explosion.style.pointerEvents = 'none';
       gridContainer.appendChild(explosion);
       
-      // Particle effects
       const particles = ['🔥', '⚡', '💫', '✨'];
       for (let i = 0; i < 8; i++) {
         setTimeout(() => {
@@ -1504,34 +1361,13 @@
       }
     }
 
-    async function saveProgress(stars) {
-      if (progressData.length >= 999) {
-        showFeedback('⚠️ Batas maksimal 999 data progres tercapai', 'warning');
-        return;
-      }
-
-      const progressRecord = {
-        level: currentLevel,
-        stars: stars,
-        attempts: attempts,
-        blocks_used: workspace.length,
-        completed_at: new Date().toISOString()
-      };
-
-      const result = await window.dataSdk.create(progressRecord);
-      if (!result.isOk) {
-        console.error('Failed to save progress');
-      }
-    }
-
     function updateProgressDisplay() {
-      const config = window.elementSdk?.config || defaultConfig;
       const display = document.getElementById('progress-display');
       
       if (!display) return;
       
       if (progressData.length === 0) {
-        display.innerHTML = `<p class="body-text text-element col-span-full text-center" style="color: rgba(241, 245, 249, 0.5); font-size: ${(config.font_size || 16) * 0.9}px;">Belum ada progres tersimpan</p>`;
+        display.innerHTML = `<p class="col-span-full text-center" style="color: rgba(241, 245, 249, 0.5); font-size: ${config.font_size * 0.9}px;">Belum ada progres tersimpan</p>`;
         return;
       }
       
@@ -1540,13 +1376,13 @@
         const date = new Date(record.completed_at);
         displayHTML += `
           <div class="p-2 rounded-lg" style="background-color: rgba(59, 130, 246, 0.1);">
-            <div class="body-text text-element font-bold mb-1" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.8}px;">
+            <div class="font-bold mb-1" style="color: ${config.text_color}; font-size: ${config.font_size * 0.8}px;">
               L${record.level}
             </div>
-            <div class="body-text text-element mb-0.5" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.8}px;">
+            <div class="mb-0.5" style="color: ${config.text_color}; font-size: ${config.font_size * 0.8}px;">
               ${'⭐'.repeat(record.stars)}
             </div>
-            <div class="body-text text-element" style="color: rgba(241, 245, 249, 0.7); font-size: ${(config.font_size || 16) * 0.65}px;">
+            <div style="color: rgba(241, 245, 249, 0.7); font-size: ${config.font_size * 0.65}px;">
               ${record.blocks_used} blok
             </div>
           </div>
@@ -1568,19 +1404,18 @@
     }
 
     function showFeedback(message, type) {
-      const config = window.elementSdk?.config || defaultConfig;
       const feedback = document.getElementById('feedback');
       feedback.classList.remove('hidden');
       
       const colors = {
-        success: config.secondary_action_color || defaultConfig.secondary_action_color,
+        success: config.secondary_action_color,
         error: '#ef4444',
         warning: '#f59e0b'
       };
       
       feedback.style.backgroundColor = colors[type] || colors.warning;
       feedback.style.color = 'white';
-      feedback.innerHTML = `<p class="body-text text-element font-bold" style="font-size: ${(config.font_size || 16) * 0.95}px;">${message}</p>`;
+      feedback.innerHTML = `<p class="font-bold" style="font-size: ${config.font_size * 0.95}px;">${message}</p>`;
     }
 
     function hideFeedback() {
@@ -1590,5 +1425,5 @@
 
     initApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b9776187567e9d5',t:'MTc2NzY2MzE0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b978a6d2271e9d5',t:'MTc2NzY2Mzk3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
