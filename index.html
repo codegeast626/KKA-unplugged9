@@ -1,0 +1,1594 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pertualangan Koding - Game Edukasi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+      50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.8); }
+    }
+    
+    @keyframes celebrate {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.1) rotate(-5deg); }
+      75% { transform: scale(1.1) rotate(5deg); }
+    }
+    
+    @keyframes victory-spin {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.3); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+    
+    @keyframes confetti-fall {
+      0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(500px) rotate(360deg); opacity: 0; }
+    }
+    
+    @keyframes star-burst {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(2); opacity: 0.8; }
+      100% { transform: scale(3); opacity: 0; }
+    }
+    
+    @keyframes pulse-rainbow {
+      0% { filter: hue-rotate(0deg) brightness(1); }
+      25% { filter: hue-rotate(90deg) brightness(1.2); }
+      50% { filter: hue-rotate(180deg) brightness(1.4); }
+      75% { filter: hue-rotate(270deg) brightness(1.2); }
+      100% { filter: hue-rotate(360deg) brightness(1); }
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    @keyframes crash-flash {
+      0%, 100% { opacity: 0; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.5); }
+    }
+    
+    @keyframes explosion {
+      0% { transform: scale(0) rotate(0deg); opacity: 1; }
+      50% { transform: scale(1.5) rotate(180deg); opacity: 0.8; }
+      100% { transform: scale(2.5) rotate(360deg); opacity: 0; }
+    }
+    
+    @keyframes bounce-back {
+      0% { transform: translateX(0) translateY(0); }
+      50% { transform: translateX(-20px) translateY(-20px); }
+      100% { transform: translateX(0) translateY(0); }
+    }
+    
+    @keyframes npc-shake {
+      0%, 100% { transform: translateX(0) scale(1); }
+      25% { transform: translateX(-3px) scale(1.1); }
+      75% { transform: translateX(3px) scale(1.1); }
+    }
+    
+    @keyframes fade-in-up {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slide-in-left {
+      0% { opacity: 0; transform: translateX(-50px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes slide-in-right {
+      0% { opacity: 0; transform: translateX(50px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes robot-walk {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(5px) rotate(2deg); }
+      75% { transform: translateX(-5px) rotate(-2deg); }
+    }
+    
+    @keyframes glow-pulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+      50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.8); }
+    }
+    
+    @keyframes bounce-gentle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .intro-title {
+      animation: fade-in-up 1s ease-out;
+    }
+    
+    .intro-subtitle {
+      animation: fade-in-up 1s ease-out 0.3s both;
+    }
+    
+    .intro-button {
+      animation: fade-in-up 1s ease-out 0.6s both, glow-pulse 2s ease-in-out 1.5s infinite;
+    }
+    
+    .tutorial-robot {
+      animation: robot-walk 2s ease-in-out infinite;
+    }
+    
+    .tutorial-step {
+      animation: fade-in-up 0.5s ease-out;
+    }
+    
+    .victory-robot {
+      animation: victory-spin 1s ease-in-out, pulse-rainbow 2s infinite;
+    }
+    
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+      animation: confetti-fall 3s linear forwards;
+    }
+    
+    .star-burst-effect {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.8) 0%, transparent 70%);
+      animation: star-burst 0.8s ease-out forwards;
+      pointer-events: none;
+    }
+    
+    .block-item {
+      cursor: grab;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .block-item:hover {
+      transform: scale(1.05);
+    }
+    
+    .block-item:active {
+      cursor: grabbing;
+    }
+    
+    .drop-zone {
+      min-height: 60px;
+      transition: background-color 0.2s;
+    }
+    
+    .drop-zone.drag-over {
+      background-color: rgba(59, 130, 246, 0.1);
+      border-color: #3b82f6;
+    }
+    
+    .robot {
+      transition: all 0.5s ease;
+    }
+    
+    .star-icon {
+      animation: float 2s ease-in-out infinite;
+    }
+    
+    .grid-cell {
+      border: 2px solid rgba(100, 116, 139, 0.4);
+      background-color: rgba(241, 245, 249, 0.05);
+      transition: background-color 0.3s;
+      position: relative;
+    }
+    
+    .grid-cell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      pointer-events: none;
+    }
+    
+    .path-highlight {
+      background-color: rgba(34, 197, 94, 0.3);
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full">
+  <div id="app" class="w-full h-full overflow-auto"></div>
+  <script>
+    const defaultConfig = {
+      background_color: "#e0e7ff",
+      surface_color: "#ffffff",
+      text_color: "#1e293b",
+      primary_action_color: "#3b82f6",
+      secondary_action_color: "#10b981",
+      game_title: "Pertualangan Koding",
+      character_name: "Roby si Robot",
+      success_message: "Hebat! Algoritma kamu sempurna!",
+      hint_message: "Coba periksa urutan perintahnya",
+      font_family: "system-ui",
+      font_size: 16
+    };
+
+    let currentLevel = 1;
+    let workspace = [];
+    let isRunning = false;
+    let attempts = 0;
+    let progressData = [];
+    let gameStarted = false;
+    let tutorialStep = 0;
+    let lives = 5;
+    
+    const blockTypes = {
+      move: { label: "Maju", icon: "→", color: "#3b82f6" },
+      turn_left: { label: "Belok Kiri", icon: "↰", color: "#8b5cf6" },
+      turn_right: { label: "Belok Kanan", icon: "↱", color: "#8b5cf6" },
+      repeat_2: { label: "Ulangi 2x", icon: "⟲", color: "#f59e0b" },
+      repeat_3: { label: "Ulangi 3x", icon: "⟳", color: "#f97316" },
+      jump: { label: "Lompat", icon: "⇡", color: "#ec4899" }
+    };
+    
+    const levels = {
+      1: {
+        title: "Level 1: Langkah Pertama",
+        description: "Gerakkan robot menuju bintang",
+        grid: 5,
+        start: { x: 0, y: 2, direction: 0 },
+        target: { x: 3, y: 2 },
+        maxBlocks: 5,
+        obstacles: [],
+        npcs: [],
+        availableBlocks: ["move"]
+      },
+      2: {
+        title: "Level 2: Berbelok",
+        description: "Robot harus berbelok untuk mencapai tujuan",
+        grid: 5,
+        start: { x: 0, y: 2, direction: 0 },
+        target: { x: 2, y: 4 },
+        maxBlocks: 7,
+        obstacles: [
+          { x: 1, y: 2 },
+          { x: 2, y: 2 }
+        ],
+        npcs: [],
+        availableBlocks: ["move", "turn_right", "turn_left"]
+      },
+      3: {
+        title: "Level 3: Hindari Monster",
+        description: "Hati-hati! Ada monster di jalur. Lewati tanpa menabrak",
+        grid: 6,
+        start: { x: 0, y: 3, direction: 0 },
+        target: { x: 5, y: 3 },
+        maxBlocks: 12,
+        obstacles: [
+          { x: 0, y: 2 },
+          { x: 1, y: 2 },
+          { x: 2, y: 2 },
+          { x: 3, y: 2 },
+          { x: 4, y: 2 },
+          { x: 1, y: 4 },
+          { x: 2, y: 4 },
+          { x: 3, y: 4 },
+          { x: 4, y: 4 }
+        ],
+        npcs: [
+          { x: 1, y: 3, type: "monster" },
+          { x: 3, y: 3, type: "monster" }
+        ],
+        availableBlocks: ["move", "turn_right", "turn_left"]
+      },
+      4: {
+        title: "Level 4: Efisiensi dengan Loop",
+        description: "Gunakan perintah 'Ulangi 2x' untuk lebih efisien",
+        grid: 6,
+        start: { x: 0, y: 3, direction: 0 },
+        target: { x: 4, y: 3 },
+        maxBlocks: 4,
+        obstacles: [
+          { x: 0, y: 2 },
+          { x: 1, y: 2 },
+          { x: 2, y: 2 },
+          { x: 3, y: 2 },
+          { x: 4, y: 2 },
+          { x: 0, y: 4 },
+          { x: 1, y: 4 },
+          { x: 2, y: 4 },
+          { x: 3, y: 4 },
+          { x: 4, y: 4 }
+        ],
+        npcs: [],
+        availableBlocks: ["move", "repeat_2"]
+      },
+      5: {
+        title: "Level 5: Labirin Zigzag",
+        description: "Loop membantu kamu lebih efisien!",
+        grid: 7,
+        start: { x: 0, y: 0, direction: 0 },
+        target: { x: 6, y: 6 },
+        maxBlocks: 18,
+        obstacles: [
+          { x: 1, y: 1 },
+          { x: 3, y: 1 },
+          { x: 3, y: 2 },
+          { x: 5, y: 3 },
+          { x: 1, y: 5 }
+        ],
+        npcs: [
+          { x: 2, y: 2, type: "monster" },
+          { x: 4, y: 3, type: "monster" }
+        ],
+        availableBlocks: ["move", "turn_right", "turn_left", "repeat_2"]
+      },
+      6: {
+        title: "Level 6: Lompatan Berani",
+        description: "Lompati rintangan untuk jalan pintas!",
+        grid: 8,
+        start: { x: 0, y: 4, direction: 0 },
+        target: { x: 7, y: 4 },
+        maxBlocks: 10,
+        obstacles: [
+          { x: 0, y: 3 },
+          { x: 1, y: 3 },
+          { x: 2, y: 3 },
+          { x: 3, y: 3 },
+          { x: 4, y: 3 },
+          { x: 5, y: 3 },
+          { x: 6, y: 3 },
+          { x: 0, y: 5 },
+          { x: 1, y: 5 },
+          { x: 2, y: 5 },
+          { x: 3, y: 5 },
+          { x: 4, y: 5 },
+          { x: 5, y: 5 },
+          { x: 6, y: 5 }
+        ],
+        npcs: [
+          { x: 2, y: 4, type: "monster" },
+          { x: 5, y: 4, type: "monster" }
+        ],
+        availableBlocks: ["move", "jump", "repeat_2"]
+      },
+      7: {
+        title: "Level 7: Labirin Kompleks",
+        description: "Kombinasikan semua perintah dengan cerdas!",
+        grid: 9,
+        start: { x: 0, y: 0, direction: 0 },
+        target: { x: 8, y: 8 },
+        maxBlocks: 18,
+        obstacles: [
+          { x: 1, y: 0 },
+          { x: 2, y: 0 },
+          { x: 1, y: 2 },
+          { x: 2, y: 2 },
+          { x: 3, y: 2 },
+          { x: 4, y: 1 },
+          { x: 4, y: 2 },
+          { x: 4, y: 3 },
+          { x: 6, y: 3 },
+          { x: 6, y: 4 },
+          { x: 6, y: 5 },
+          { x: 3, y: 5 },
+          { x: 3, y: 6 },
+          { x: 5, y: 7 },
+          { x: 6, y: 7 }
+        ],
+        npcs: [
+          { x: 1, y: 1, type: "monster" },
+          { x: 3, y: 3, type: "monster" },
+          { x: 5, y: 2, type: "monster" },
+          { x: 5, y: 5, type: "monster" },
+          { x: 7, y: 6, type: "monster" }
+        ],
+        availableBlocks: ["move", "turn_right", "turn_left", "jump", "repeat_2", "repeat_3"]
+      }
+    };
+
+    const dataHandler = {
+      onDataChanged(data) {
+        progressData = data || [];
+        updateProgressDisplay();
+      }
+    };
+
+    async function initApp() {
+      const sdkResult = await window.dataSdk.init(dataHandler);
+      if (!sdkResult.isOk) {
+        console.error("SDK initialization failed");
+      }
+      
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities,
+          mapToEditPanelValues
+        });
+      }
+      
+      render();
+    }
+
+    async function onConfigChange(config) {
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseFontStack = 'system-ui, -apple-system, sans-serif';
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      document.body.style.backgroundColor = config.background_color || defaultConfig.background_color;
+      document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      
+      const allText = document.querySelectorAll('.text-element');
+      allText.forEach(el => {
+        el.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      });
+      
+      const titles = document.querySelectorAll('.title-text');
+      titles.forEach(el => {
+        el.style.fontSize = `${baseSize * 1.5}px`;
+        el.style.color = config.text_color || defaultConfig.text_color;
+      });
+      
+      const bodyTexts = document.querySelectorAll('.body-text');
+      bodyTexts.forEach(el => {
+        el.style.fontSize = `${baseSize}px`;
+        el.style.color = config.text_color || defaultConfig.text_color;
+      });
+      
+      const surfaces = document.querySelectorAll('.surface');
+      surfaces.forEach(el => {
+        el.style.backgroundColor = config.surface_color || defaultConfig.surface_color;
+      });
+      
+      const primaryButtons = document.querySelectorAll('.primary-button');
+      primaryButtons.forEach(el => {
+        el.style.backgroundColor = config.primary_action_color || defaultConfig.primary_action_color;
+      });
+      
+      const secondaryButtons = document.querySelectorAll('.secondary-button');
+      secondaryButtons.forEach(el => {
+        el.style.backgroundColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      });
+      
+      const gameTitle = document.getElementById('game-title');
+      if (gameTitle) {
+        gameTitle.textContent = config.game_title || defaultConfig.game_title;
+      }
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => {
+              config.background_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ background_color: value });
+            }
+          },
+          {
+            get: () => config.surface_color || defaultConfig.surface_color,
+            set: (value) => {
+              config.surface_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ surface_color: value });
+            }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => {
+              config.text_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ text_color: value });
+            }
+          },
+          {
+            get: () => config.primary_action_color || defaultConfig.primary_action_color,
+            set: (value) => {
+              config.primary_action_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ primary_action_color: value });
+            }
+          },
+          {
+            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+            set: (value) => {
+              config.secondary_action_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ secondary_action_color: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (value) => {
+            config.font_family = value;
+            if (window.elementSdk) window.elementSdk.setConfig({ font_family: value });
+          }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (value) => {
+            config.font_size = value;
+            if (window.elementSdk) window.elementSdk.setConfig({ font_size: value });
+          }
+        }
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["game_title", config.game_title || defaultConfig.game_title],
+        ["character_name", config.character_name || defaultConfig.character_name],
+        ["success_message", config.success_message || defaultConfig.success_message],
+        ["hint_message", config.hint_message || defaultConfig.hint_message]
+      ]);
+    }
+
+    function showGameOver() {
+      const config = window.elementSdk?.config || defaultConfig;
+      const app = document.getElementById('app');
+      
+      app.innerHTML = `
+        <div class="w-full h-full flex items-center justify-center p-6" style="background-color: ${config.background_color};">
+          <div class="max-w-2xl w-full">
+            <div class="surface rounded-2xl p-8 shadow-2xl text-center" style="background-color: ${config.surface_color};">
+              <div style="font-size: ${(config.font_size || 16) * 4}px;" class="mb-4">😢</div>
+              <h2 class="title-text text-element font-bold mb-4" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 2}px;">
+                Game Over!
+              </h2>
+              <p class="body-text text-element mb-6" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1.1}px;">
+                Nyawa kamu habis! Jangan menyerah, coba lagi dari awal.
+              </p>
+              <div class="mb-6 p-4 rounded-lg" style="background-color: rgba(59, 130, 246, 0.2);">
+                <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.95}px;">
+                  Kamu mencapai <strong>Level ${currentLevel}</strong><br>
+                  Total percobaan: <strong>${attempts}</strong>
+                </p>
+              </div>
+              <button id="restart-game" class="px-12 py-4 rounded-xl font-bold body-text text-element transition-all hover:opacity-80" style="background-color: ${config.primary_action_color}; color: white; font-size: ${(config.font_size || 16) * 1.2}px;">
+                🔄 Mulai Permainan Baru
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('restart-game').addEventListener('click', (e) => {
+        playButtonSound();
+        e.target.disabled = true;
+        e.target.style.opacity = '0.6';
+        setTimeout(() => {
+          currentLevel = 1;
+          lives = 5;
+          attempts = 0;
+          workspace = [];
+          isRunning = false;
+          render();
+        }, 150);
+      });
+    }
+
+    function render() {
+      if (!gameStarted) {
+        renderIntro();
+        return;
+      }
+      
+      const config = window.elementSdk?.config || defaultConfig;
+      const level = levels[currentLevel];
+      
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div class="w-full min-h-full p-2 md:p-3" style="background-color: ${config.background_color};">
+          <div class="max-w-7xl mx-auto">
+            <!-- Header & Level Info - Compact Landscape -->
+            <div class="surface rounded-xl p-3 mb-4 shadow-lg" style="background-color: ${config.surface_color};">
+              <div class="flex flex-wrap justify-between items-center gap-3">
+                <div>
+                  <h1 id="game-title" class="title-text text-element font-bold" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1.2}px;">
+                    ${config.game_title} - ${level.title}
+                  </h1>
+                  <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.8}px;">
+                    ${level.description}
+                  </p>
+                </div>
+                <div class="flex gap-2 items-center flex-wrap">
+                  <div class="body-text text-element px-2.5 py-1 rounded-full" style="background-color: rgba(239, 68, 68, 0.3); color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.75}px;">
+                    ❤️ ${lives}
+                  </div>
+                  <div class="body-text text-element px-2.5 py-1 rounded-full" style="background-color: rgba(59, 130, 246, 0.3); color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.75}px;">
+                    Maks: ${level.maxBlocks}
+                  </div>
+                  <div class="body-text text-element px-2.5 py-1 rounded-full" style="background-color: rgba(245, 158, 11, 0.3); color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.75}px;">
+                    Try: ${attempts}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Main Game Area - Responsive Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+              <!-- Game Grid - Left/Top Side -->
+              <div class="surface rounded-xl p-4 shadow-lg" style="background-color: ${config.surface_color};">
+                <h3 class="title-text text-element font-bold mb-3" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1}px;">
+                  🎮 Arena Permainan
+                </h3>
+                <div class="flex justify-center items-center">
+                  <div id="game-grid" class="inline-block"></div>
+                </div>
+              </div>
+
+              <!-- Workspace - Right/Bottom Side -->
+              <div class="surface rounded-xl p-4 shadow-lg" style="background-color: ${config.surface_color};">
+                <h3 class="title-text text-element font-bold mb-3" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1}px;">
+                  🧩 Area Kerja Algoritma
+                </h3>
+                
+                <!-- Available Blocks -->
+                <div class="mb-3">
+                  <p class="body-text text-element mb-2" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.8}px;">
+                    Blok Perintah:
+                  </p>
+                  <div id="block-palette" class="flex flex-wrap gap-1.5"></div>
+                </div>
+
+                <!-- Drop Zone -->
+                <div class="mb-3">
+                  <p id="workspace-counter" class="body-text text-element mb-2" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.8}px;">
+                    Susun perintah (${workspace.length}/${level.maxBlocks}):
+                  </p>
+                  <div id="workspace" class="drop-zone border-2 border-dashed rounded-lg p-3 min-h-24" style="border-color: rgba(59, 130, 246, 0.3);"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-2 mb-3">
+                  <button id="run-btn" class="primary-button px-5 py-2.5 rounded-lg font-bold body-text text-element transition-all hover:opacity-80" style="background-color: ${config.primary_action_color}; color: white; font-size: ${(config.font_size || 16) * 0.9}px;">
+                    ▶ Jalankan
+                  </button>
+                  <button id="reset-btn" class="secondary-button px-5 py-2.5 rounded-lg font-bold body-text text-element transition-all hover:opacity-80" style="background-color: ${config.secondary_action_color}; color: white; font-size: ${(config.font_size || 16) * 0.9}px;">
+                    ↺ Reset
+                  </button>
+                  <button id="clear-btn" class="px-5 py-2.5 rounded-lg font-bold body-text text-element transition-all hover:opacity-80" style="background-color: rgba(239, 68, 68, 0.8); color: white; font-size: ${(config.font_size || 16) * 0.9}px;">
+                    🗑 Hapus
+                  </button>
+                </div>
+
+                <!-- Feedback Area -->
+                <div id="feedback" class="p-3 rounded-lg hidden"></div>
+              </div>
+            </div>
+
+            <!-- Progress Display - Compact -->
+            <div class="surface rounded-xl p-3 shadow-lg" style="background-color: ${config.surface_color};">
+              <h3 class="title-text text-element font-bold mb-2" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.95}px;">
+                📊 Progres
+              </h3>
+              <div id="progress-display" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2"></div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      renderGrid();
+      renderBlockPalette();
+      renderWorkspace();
+      updateProgressDisplay();
+      setupEventListeners();
+    }
+
+    function renderIntro() {
+      const config = window.elementSdk?.config || defaultConfig;
+      const app = document.getElementById('app');
+      
+      if (tutorialStep === 0) {
+        // Welcome screen
+        app.innerHTML = `
+          <div class="w-full h-full flex items-center justify-center p-6" style="background: linear-gradient(135deg, ${config.background_color} 0%, #1e3a8a 100%);">
+            <div class="max-w-3xl w-full text-center">
+              <div class="intro-title mb-8" style="font-size: ${(config.font_size || 16) * 3}px;">
+                🤖
+              </div>
+              <h1 class="intro-title title-text text-element font-bold mb-4" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 2.5}px;">
+                ${config.game_title}
+              </h1>
+              <p class="intro-subtitle body-text text-element mb-8" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1.2}px; opacity: 0.9;">
+                Selamat datang di dunia pemrograman visual! <br>
+                Bantu <strong>${config.character_name}</strong> mencapai bintang dengan menyusun algoritma yang tepat.
+              </p>
+              <div class="intro-subtitle mb-8 flex justify-center gap-8 flex-wrap">
+                <div class="text-center">
+                  <div style="font-size: ${(config.font_size || 16) * 2}px;" class="mb-2">🎯</div>
+                  <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.9}px;">7 Level Seru</p>
+                </div>
+                <div class="text-center">
+                  <div style="font-size: ${(config.font_size || 16) * 2}px;" class="mb-2">🧩</div>
+                  <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.9}px;">Blok Perintah</p>
+                </div>
+                <div class="text-center">
+                  <div style="font-size: ${(config.font_size || 16) * 2}px;" class="mb-2">👾</div>
+                  <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.9}px;">Hindari Monster</p>
+                </div>
+              </div>
+              <button id="start-tutorial" class="intro-button px-12 py-4 rounded-xl font-bold body-text text-element transition-all hover:opacity-80" style="background-color: ${config.primary_action_color}; color: white; font-size: ${(config.font_size || 16) * 1.2}px;">
+                🚀 Mulai Petualangan
+              </button>
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('start-tutorial').addEventListener('click', (e) => {
+          playButtonSound();
+          e.target.disabled = true;
+          e.target.style.opacity = '0.6';
+          setTimeout(() => {
+            tutorialStep = 1;
+            renderIntro();
+          }, 150);
+        });
+      } else if (tutorialStep === 1) {
+        // Tutorial step 1: Movement
+        app.innerHTML = `
+          <div class="w-full h-full flex items-center justify-center p-6" style="background-color: ${config.background_color};">
+            <div class="max-w-4xl w-full">
+              <div class="surface rounded-2xl p-8 shadow-2xl tutorial-step" style="background-color: ${config.surface_color};">
+                <h2 class="title-text text-element font-bold mb-6 text-center" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1.8}px;">
+                  📚 Cara Bermain - Langkah 1
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                  <!-- Visual Demo -->
+                  <div class="flex flex-col items-center justify-center p-6 rounded-xl" style="background-color: rgba(59, 130, 246, 0.1);">
+                    <div class="mb-4" style="font-size: ${(config.font_size || 16) * 4}px;">
+                      <span class="tutorial-robot">🤖</span> <span style="opacity: 0.3;">→ → →</span> <span>⭐</span>
+                    </div>
+                    <p class="body-text text-element text-center" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1.1}px;">
+                      Robot bergerak menuju bintang
+                    </p>
+                  </div>
+                  
+                  <!-- Instructions -->
+                  <div class="flex flex-col justify-center">
+                    <div class="mb-4 flex items-start gap-3">
+                      <div class="px-3 py-2 rounded-lg font-bold" style="background-color: #3b82f6; color: white; font-size: ${(config.font_size || 16) * 0.9}px;">
+                        → Maju
+                      </div>
+                      <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.95}px;">
+                        Gerakkan robot satu kotak ke depan
+                      </p>
+                    </div>
+                    <div class="mb-4 flex items-start gap-3">
+                      <div class="px-3 py-2 rounded-lg font-bold" style="background-color: #8b5cf6; color: white; font-size: ${(config.font_size || 16) * 0.9}px;">
+                        ↰ ↱ Belok
+                      </div>
+                      <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.95}px;">
+                        Putar robot ke kiri atau kanan
+                      </p>
+                    </div>
+                    <div class="p-4 rounded-lg" style="background-color: rgba(245, 158, 11, 0.2);">
+                      <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.9}px;">
+                        💡 <strong>Tips:</strong> Seret blok perintah ke area kerja dan susun urutannya!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <button id="next-step" class="w-full px-8 py-4 rounded-xl font-bold body-text text-element transition-all hover:opacity-80" style="background-color: ${config.primary_action_color}; color: white; font-size: ${(config.font_size || 16) * 1.1}px;">
+                  Lanjut ➜
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('next-step').addEventListener('click', (e) => {
+          playButtonSound();
+          e.target.disabled = true;
+          e.target.style.opacity = '0.6';
+          setTimeout(() => {
+            tutorialStep = 2;
+            renderIntro();
+          }, 150);
+        });
+      } else if (tutorialStep === 2) {
+        // Tutorial step 2: Obstacles
+        app.innerHTML = `
+          <div class="w-full h-full flex items-center justify-center p-6" style="background-color: ${config.background_color};">
+            <div class="max-w-4xl w-full">
+              <div class="surface rounded-2xl p-8 shadow-2xl tutorial-step" style="background-color: ${config.surface_color};">
+                <h2 class="title-text text-element font-bold mb-6 text-center" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1.8}px;">
+                  📚 Cara Bermain - Langkah 2
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                  <!-- Visual Demo -->
+                  <div class="flex flex-col items-center justify-center p-6 rounded-xl" style="background-color: rgba(239, 68, 68, 0.1);">
+                    <div class="mb-4" style="font-size: ${(config.font_size || 16) * 3.5}px;">
+                      🤖 <span style="opacity: 0.5;">🧱</span> <span>👾</span>
+                    </div>
+                    <p class="body-text text-element text-center font-bold" style="color: #ef4444; font-size: ${(config.font_size || 16) * 1.1}px;">
+                      Hindari Rintangan!
+                    </p>
+                  </div>
+                  
+                  <!-- Instructions -->
+                  <div class="flex flex-col justify-center gap-4">
+                    <div class="p-4 rounded-lg" style="background-color: rgba(100, 100, 100, 0.2);">
+                      <div class="flex items-center gap-3 mb-2">
+                        <span style="font-size: ${(config.font_size || 16) * 1.8}px;">🧱</span>
+                        <p class="body-text text-element font-bold" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1}px;">Dinding</p>
+                      </div>
+                      <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.85}px; opacity: 0.8;">
+                        Tidak bisa dilewati, cari jalan lain!
+                      </p>
+                    </div>
+                    
+                    <div class="p-4 rounded-lg" style="background-color: rgba(139, 92, 246, 0.2);">
+                      <div class="flex items-center gap-3 mb-2">
+                        <span style="font-size: ${(config.font_size || 16) * 1.8}px;">👾</span>
+                        <p class="body-text text-element font-bold" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1}px;">Monster</p>
+                      </div>
+                      <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.85}px; opacity: 0.8;">
+                        Jangan menabrak! Rencanakan rute dengan hati-hati.
+                      </p>
+                    </div>
+                    
+                    <div class="p-4 rounded-xl" style="background-color: rgba(16, 185, 129, 0.2);">
+                      <div class="flex items-center gap-3 mb-2">
+                        <span style="font-size: ${(config.font_size || 16) * 1.8}px;">⟲</span>
+                        <p class="body-text text-element font-bold" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 1}px;">Loop (Ulangi)</p>
+                      </div>
+                      <p class="body-text text-element" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.85}px; opacity: 0.8;">
+                        Gunakan loop untuk mengulang perintah dengan efisien!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <button id="start-game" class="w-full px-8 py-4 rounded-xl font-bold body-text text-element transition-all hover:opacity-80" style="background-color: ${config.secondary_action_color}; color: white; font-size: ${(config.font_size || 16) * 1.1}px;">
+                  🎮 Mulai Bermain!
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('start-game').addEventListener('click', (e) => {
+          playButtonSound();
+          e.target.disabled = true;
+          e.target.style.opacity = '0.6';
+          setTimeout(() => {
+            gameStarted = true;
+            render();
+          }, 150);
+        });
+      }
+    }
+
+    function renderGrid() {
+      const config = window.elementSdk?.config || defaultConfig;
+      const level = levels[currentLevel];
+      const gridContainer = document.getElementById('game-grid');
+      
+      const cellSize = Math.min(60, Math.floor(400 / level.grid));
+      
+      let gridHTML = '<div style="display: inline-block; position: relative;">';
+      for (let y = 0; y < level.grid; y++) {
+        gridHTML += '<div style="display: flex;">';
+        for (let x = 0; x < level.grid; x++) {
+          const isStart = x === level.start.x && y === level.start.y;
+          const isTarget = x === level.target.x && y === level.target.y;
+          const hasObstacle = level.obstacles && level.obstacles.some(obs => obs.x === x && obs.y === y);
+          const hasNPC = level.npcs && level.npcs.some(npc => npc.x === x && npc.y === y);
+          const npc = hasNPC ? level.npcs.find(n => n.x === x && n.y === y) : null;
+          
+          const bgColor = hasObstacle ? 'rgba(100, 100, 100, 0.8)' : 'transparent';
+          
+          gridHTML += `
+            <div class="grid-cell" data-x="${x}" data-y="${y}" style="width: ${cellSize}px; height: ${cellSize}px; display: flex; align-items: center; justify-content: center; font-size: ${cellSize * 0.6}px; background-color: ${bgColor};">
+              ${isTarget ? '<span class="star-icon" style="animation-delay: ${Math.random()}s;">⭐</span>' : ''}
+              ${hasObstacle ? '<span style="font-size: ' + (cellSize * 0.5) + 'px;">🧱</span>' : ''}
+              ${hasNPC && npc.type === 'monster' ? '<span id="npc-' + x + '-' + y + '" style="font-size: ' + (cellSize * 0.6) + 'px;">👾</span>' : ''}
+            </div>
+          `;
+        }
+        gridHTML += '</div>';
+      }
+      
+      // Robot positioned absolutely
+      gridHTML += `<span class="robot" id="robot" style="position: absolute; left: 0; top: 0; width: ${cellSize}px; height: ${cellSize}px; display: flex; align-items: center; justify-content: center; font-size: ${cellSize * 0.6}px; transform: translate(${level.start.x * cellSize}px, ${level.start.y * cellSize}px) rotate(${level.start.direction}deg);">🤖</span>`;
+      
+      gridHTML += '</div>';
+      
+      gridContainer.innerHTML = gridHTML;
+    }
+
+    function renderBlockPalette() {
+      const config = window.elementSdk?.config || defaultConfig;
+      const level = levels[currentLevel];
+      const palette = document.getElementById('block-palette');
+      
+      let paletteHTML = '';
+      
+      // Only show blocks available for this level
+      const availableBlocks = level.availableBlocks || Object.keys(blockTypes);
+      
+      availableBlocks.forEach(type => {
+        const block = blockTypes[type];
+        if (block) {
+          paletteHTML += `
+            <div class="block-item px-4 py-2 rounded-lg font-bold shadow-md body-text text-element" 
+                 draggable="true" 
+                 data-block-type="${type}"
+                 style="background-color: ${block.color}; color: white; font-size: ${(config.font_size || 16) * 0.9}px;">
+              ${block.icon} ${block.label}
+            </div>
+          `;
+        }
+      });
+      
+      palette.innerHTML = paletteHTML;
+      
+      palette.querySelectorAll('.block-item').forEach(block => {
+        block.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('blockType', e.target.dataset.blockType);
+        });
+      });
+    }
+
+    function renderWorkspace() {
+      const config = window.elementSdk?.config || defaultConfig;
+      const level = levels[currentLevel];
+      const workspaceEl = document.getElementById('workspace');
+      const counterEl = document.getElementById('workspace-counter');
+      
+      // Update counter
+      if (counterEl) {
+        counterEl.innerHTML = `Susun perintah di sini (${workspace.length}/${level.maxBlocks} blok):`;
+      }
+      
+      if (workspace.length === 0) {
+        workspaceEl.innerHTML = `<p class="body-text text-element text-center" style="color: rgba(241, 245, 249, 0.5); font-size: ${(config.font_size || 16) * 0.9}px;">Seret blok perintah ke sini</p>`;
+        return;
+      }
+      
+      let workspaceHTML = '<div class="flex flex-wrap gap-2">';
+      workspace.forEach((blockType, index) => {
+        const block = blockTypes[blockType];
+        workspaceHTML += `
+          <div class="px-3 py-2 rounded-lg font-bold shadow-md flex items-center gap-2 body-text text-element" 
+               style="background-color: ${block.color}; color: white; font-size: ${(config.font_size || 16) * 0.85}px;">
+            ${block.icon} ${block.label}
+            <button class="remove-block font-bold" data-index="${index}" style="color: white;">✕</button>
+          </div>
+        `;
+      });
+      workspaceHTML += '</div>';
+      
+      workspaceEl.innerHTML = workspaceHTML;
+      
+      workspaceEl.querySelectorAll('.remove-block').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const index = parseInt(e.target.dataset.index);
+          workspace.splice(index, 1);
+          renderWorkspace();
+        });
+      });
+    }
+
+    function setupEventListeners() {
+      const workspaceEl = document.getElementById('workspace');
+      
+      workspaceEl.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        workspaceEl.classList.add('drag-over');
+      });
+      
+      workspaceEl.addEventListener('dragleave', () => {
+        workspaceEl.classList.remove('drag-over');
+      });
+      
+      workspaceEl.addEventListener('drop', (e) => {
+        e.preventDefault();
+        workspaceEl.classList.remove('drag-over');
+        
+        const level = levels[currentLevel];
+        if (workspace.length >= level.maxBlocks) {
+          showFeedback('⚠️ Maksimal ' + level.maxBlocks + ' blok!', 'warning');
+          return;
+        }
+        
+        const blockType = e.dataTransfer.getData('blockType');
+        workspace.push(blockType);
+        renderWorkspace();
+      });
+      
+      document.getElementById('run-btn').addEventListener('click', () => {
+        playButtonSound();
+        runAlgorithm();
+      });
+      document.getElementById('reset-btn').addEventListener('click', () => {
+        playButtonSound();
+        resetLevel();
+      });
+      document.getElementById('clear-btn').addEventListener('click', () => {
+        playButtonSound();
+        clearWorkspace();
+      });
+    }
+
+    function moveRobot(pos, robot, cellSize) {
+      const direction = pos.direction;
+      // Arah 0 = kanan (→), 90 = bawah (↓), 180 = kiri (←), 270 = atas (↑)
+      if (direction === 0) {
+        pos.x++;
+      } else if (direction === 90) {
+        pos.y++;
+      } else if (direction === 180) {
+        pos.x--;
+      } else if (direction === 270) {
+        pos.y--;
+      }
+      
+      robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg)`;
+    }
+
+    async function runAlgorithm() {
+      if (isRunning || workspace.length === 0) return;
+      
+      isRunning = true;
+      attempts++;
+      
+      const config = window.elementSdk?.config || defaultConfig;
+      const level = levels[currentLevel];
+      const robot = document.getElementById('robot');
+      const cellSize = Math.min(60, Math.floor(400 / level.grid));
+      
+      let pos = { x: level.start.x, y: level.start.y, direction: level.start.direction };
+      
+      hideFeedback();
+      
+      // Helper function to check collisions
+      function checkObstacle(x, y) {
+        if (level.obstacles && level.obstacles.length > 0) {
+          return level.obstacles.some(obs => obs.x === x && obs.y === y);
+        }
+        return false;
+      }
+      
+      function checkNPCCollision(x, y) {
+        if (level.npcs && level.npcs.length > 0) {
+          return level.npcs.some(npc => npc.x === x && npc.y === y);
+        }
+        return false;
+      }
+      
+      // Execute instructions
+      for (let i = 0; i < workspace.length; i++) {
+        const instruction = workspace[i];
+        
+        await new Promise(resolve => setTimeout(resolve, 600));
+        
+        if (instruction === 'move') {
+          moveRobot(pos, robot, cellSize);
+          
+          if (pos.x < 0 || pos.x >= level.grid || pos.y < 0 || pos.y >= level.grid) {
+            lives--;
+            playErrorSound();
+            robot.style.filter = 'brightness(0.5)';
+            robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg) scale(0.8)`;
+            showFeedback('❌ Robot keluar jalur! ' + (config.hint_message || defaultConfig.hint_message) + ' | Nyawa tersisa: ' + lives, 'error');
+            isRunning = false;
+            if (lives <= 0) {
+              setTimeout(() => showGameOver(), 1500);
+            } else {
+              setTimeout(() => render(), 1500);
+            }
+            return;
+          }
+          
+          if (checkObstacle(pos.x, pos.y)) {
+            lives--;
+            createCrashEffect(pos.x * cellSize, pos.y * cellSize, '🧱');
+            playErrorSound();
+            robot.style.filter = 'hue-rotate(180deg) brightness(0.7)';
+            shakeElement(robot);
+            showFeedback('🧱 Robot menabrak dinding! Cari jalan lain. | Nyawa tersisa: ' + lives, 'error');
+            isRunning = false;
+            if (lives <= 0) {
+              setTimeout(() => showGameOver(), 1500);
+            } else {
+              setTimeout(() => render(), 1500);
+            }
+            return;
+          }
+          
+          if (checkNPCCollision(pos.x, pos.y)) {
+            lives--;
+            // Play sound IMMEDIATELY without await
+            playErrorSound();
+            
+            // Then show visual effects
+            createExplosionEffect(pos.x * cellSize, pos.y * cellSize);
+            shakeNPC(pos.x, pos.y);
+            robot.style.filter = 'hue-rotate(90deg) brightness(0.5)';
+            robot.style.animation = 'shake 0.5s, bounce-back 0.6s';
+            showFeedback('💥 Robot menabrak monster! Coba hindari mereka. | Nyawa tersisa: ' + lives, 'error');
+            isRunning = false;
+            if (lives <= 0) {
+              setTimeout(() => showGameOver(), 1500);
+            } else {
+              setTimeout(() => render(), 1500);
+            }
+            return;
+          }
+        } else if (instruction === 'turn_left') {
+          pos.direction = (pos.direction + 270) % 360;
+          robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg)`;
+        } else if (instruction === 'turn_right') {
+          pos.direction = (pos.direction + 90) % 360;
+          robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg)`;
+        } else if (instruction === 'repeat_2' || instruction === 'repeat_3') {
+          const repeatCount = instruction === 'repeat_2' ? 2 : 3;
+          const nextInstruction = workspace[i + 1];
+          
+          if (nextInstruction) {
+            for (let j = 0; j < repeatCount; j++) {
+              await new Promise(resolve => setTimeout(resolve, 600));
+              
+              if (nextInstruction === 'move') {
+                moveRobot(pos, robot, cellSize);
+                
+                if (pos.x < 0 || pos.x >= level.grid || pos.y < 0 || pos.y >= level.grid) {
+                  lives--;
+                  playErrorSound();
+                  robot.style.filter = 'brightness(0.5)';
+                  robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg) scale(0.8)`;
+                  showFeedback('❌ Robot keluar jalur! ' + (config.hint_message || defaultConfig.hint_message) + ' | Nyawa tersisa: ' + lives, 'error');
+                  isRunning = false;
+                  if (lives <= 0) {
+                    setTimeout(() => showGameOver(), 1500);
+                  } else {
+                    setTimeout(() => render(), 1500);
+                  }
+                  return;
+                }
+                
+                if (checkObstacle(pos.x, pos.y)) {
+                  lives--;
+                  createCrashEffect(pos.x * cellSize, pos.y * cellSize, '🧱');
+                  playErrorSound();
+                  robot.style.filter = 'hue-rotate(180deg) brightness(0.7)';
+                  shakeElement(robot);
+                  showFeedback('🧱 Robot menabrak dinding! Cari jalan lain. | Nyawa tersisa: ' + lives, 'error');
+                  isRunning = false;
+                  if (lives <= 0) {
+                    setTimeout(() => showGameOver(), 1500);
+                  } else {
+                    setTimeout(() => render(), 1500);
+                  }
+                  return;
+                }
+                
+                if (checkNPCCollision(pos.x, pos.y)) {
+                  lives--;
+                  // Play sound IMMEDIATELY without await
+                  playErrorSound();
+                  
+                  // Then show visual effects
+                  createExplosionEffect(pos.x * cellSize, pos.y * cellSize);
+                  shakeNPC(pos.x, pos.y);
+                  robot.style.filter = 'hue-rotate(90deg) brightness(0.5)';
+                  robot.style.animation = 'shake 0.5s, bounce-back 0.6s';
+                  showFeedback('💥 Robot menabrak monster! Coba hindari mereka. | Nyawa tersisa: ' + lives, 'error');
+                  isRunning = false;
+                  if (lives <= 0) {
+                    setTimeout(() => showGameOver(), 1500);
+                  } else {
+                    setTimeout(() => render(), 1500);
+                  }
+                  return;
+                }
+              } else if (nextInstruction === 'turn_left') {
+                pos.direction = (pos.direction + 270) % 360;
+                robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg)`;
+              } else if (nextInstruction === 'turn_right') {
+                pos.direction = (pos.direction + 90) % 360;
+                robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg)`;
+              }
+            }
+            i++; // Skip next instruction as it was executed in loop
+          }
+        } else if (instruction === 'jump') {
+          // Jump animation
+          robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg) scale(1.2)`;
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          const direction = pos.direction;
+          if (direction === 0) pos.x += 2;
+          else if (direction === 90) pos.y += 2;
+          else if (direction === 180) pos.x -= 2;
+          else if (direction === 270) pos.y -= 2;
+          
+          if (pos.x < 0 || pos.x >= level.grid || pos.y < 0 || pos.y >= level.grid) {
+            lives--;
+            playErrorSound();
+            robot.style.filter = 'brightness(0.5)';
+            robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg) scale(0.8)`;
+            showFeedback('❌ Robot keluar jalur! ' + (config.hint_message || defaultConfig.hint_message) + ' | Nyawa tersisa: ' + lives, 'error');
+            isRunning = false;
+            if (lives <= 0) {
+              setTimeout(() => showGameOver(), 1500);
+            } else {
+              setTimeout(() => render(), 1500);
+            }
+            return;
+          }
+          
+          if (checkObstacle(pos.x, pos.y)) {
+            lives--;
+            createCrashEffect(pos.x * cellSize, pos.y * cellSize, '🧱');
+            playErrorSound();
+            robot.style.filter = 'hue-rotate(180deg) brightness(0.7)';
+            shakeElement(robot);
+            showFeedback('🧱 Robot menabrak dinding! Lompatan gagal. | Nyawa tersisa: ' + lives, 'error');
+            isRunning = false;
+            if (lives <= 0) {
+              setTimeout(() => showGameOver(), 1500);
+            } else {
+              setTimeout(() => render(), 1500);
+            }
+            return;
+          }
+          
+          if (checkNPCCollision(pos.x, pos.y)) {
+            lives--;
+            // Play sound IMMEDIATELY without await
+            playErrorSound();
+            
+            // Then show visual effects
+            createExplosionEffect(pos.x * cellSize, pos.y * cellSize);
+            shakeNPC(pos.x, pos.y);
+            robot.style.filter = 'hue-rotate(90deg) brightness(0.5)';
+            robot.style.animation = 'shake 0.5s, bounce-back 0.6s';
+            showFeedback('💥 Robot menabrak monster! Lompatan gagal. | Nyawa tersisa: ' + lives, 'error');
+            isRunning = false;
+            if (lives <= 0) {
+              setTimeout(() => showGameOver(), 1500);
+            } else {
+              setTimeout(() => render(), 1500);
+            }
+            return;
+          }
+          
+          robot.style.transform = `translate(${pos.x * cellSize}px, ${pos.y * cellSize}px) rotate(${pos.direction}deg)`;
+        }
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 400));
+      
+      if (pos.x === level.target.x && pos.y === level.target.y) {
+        const stars = workspace.length <= level.maxBlocks - 2 ? 3 : workspace.length <= level.maxBlocks - 1 ? 2 : 1;
+        
+        // Trigger victory effects
+        robot.classList.add('victory-robot');
+        createConfetti();
+        createStarBurst(pos.x * cellSize, pos.y * cellSize);
+        playVictorySound();
+        
+        showFeedback('🎉 ' + (config.success_message || defaultConfig.success_message) + ' ⭐'.repeat(stars), 'success');
+        
+        await saveProgress(stars);
+        
+        setTimeout(() => {
+          if (currentLevel < Object.keys(levels).length) {
+            currentLevel++;
+            workspace = [];
+            attempts = 0;
+            isRunning = false;
+            render();
+          } else {
+            showFeedback('🏆 SELAMAT! Kamu telah menyelesaikan semua level! Kamu adalah Master Koding! 🎊', 'success');
+          }
+        }, 3000);
+      } else {
+        showFeedback('🤔 Belum sampai tujuan. ' + (config.hint_message || defaultConfig.hint_message), 'warning');
+      }
+      
+      isRunning = false;
+    }
+    
+    function createConfetti() {
+      const gridContainer = document.getElementById('game-grid').parentElement;
+      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#ff1493'];
+      
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+          confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+          gridContainer.appendChild(confetti);
+          
+          setTimeout(() => confetti.remove(), 5000);
+        }, i * 30);
+      }
+    }
+    
+    function createStarBurst(x, y) {
+      const gridContainer = document.getElementById('game-grid');
+      const burst = document.createElement('div');
+      burst.className = 'star-burst-effect';
+      burst.style.left = x + 'px';
+      burst.style.top = y + 'px';
+      gridContainer.appendChild(burst);
+      
+      setTimeout(() => burst.remove(), 1000);
+    }
+    
+    function playButtonSound() {
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 800;
+        
+        const now = audioContext.currentTime;
+        gainNode.gain.setValueAtTime(0.15, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        
+        oscillator.start(now);
+        oscillator.stop(now + 0.08);
+      } catch (e) {
+        // Audio failed silently
+      }
+    }
+    
+    function playVictorySound() {
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Victory melody notes (frequencies in Hz)
+        const melody = [
+          { freq: 523.25, duration: 0.15 }, // C5
+          { freq: 659.25, duration: 0.15 }, // E5
+          { freq: 783.99, duration: 0.15 }, // G5
+          { freq: 1046.50, duration: 0.3 }, // C6
+          { freq: 783.99, duration: 0.15 }, // G5
+          { freq: 1046.50, duration: 0.4 }  // C6
+        ];
+        
+        let startTime = audioContext.currentTime;
+        
+        melody.forEach((note, index) => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          oscillator.frequency.value = note.freq;
+          oscillator.type = 'sine';
+          
+          gainNode.gain.setValueAtTime(0.25, startTime);
+          gainNode.gain.linearRampToValueAtTime(0.01, startTime + note.duration - 0.01);
+          gainNode.gain.setValueAtTime(0, startTime + note.duration);
+          
+          oscillator.start(startTime);
+          oscillator.stop(startTime + note.duration);
+          
+          startTime += note.duration;
+        });
+      } catch (e) {
+        // Audio failed silently
+      }
+    }
+    
+    function playErrorSound() {
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.type = 'square';
+        oscillator.frequency.value = 100;
+        
+        const now = audioContext.currentTime;
+        gainNode.gain.setValueAtTime(0.5, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        
+        oscillator.start(now);
+        oscillator.stop(now + 0.15);
+      } catch (e) {
+        // Audio failed silently
+      }
+    }
+    
+    function shakeElement(element) {
+      element.style.animation = 'shake 0.5s';
+      setTimeout(() => {
+        element.style.animation = '';
+      }, 500);
+    }
+    
+    function createCrashEffect(x, y, icon) {
+      const gridContainer = document.getElementById('game-grid');
+      const crash = document.createElement('div');
+      crash.style.position = 'absolute';
+      crash.style.left = x + 'px';
+      crash.style.top = y + 'px';
+      crash.style.fontSize = '40px';
+      crash.style.animation = 'crash-flash 0.6s ease-out';
+      crash.textContent = icon;
+      crash.style.pointerEvents = 'none';
+      gridContainer.appendChild(crash);
+      
+      setTimeout(() => crash.remove(), 600);
+    }
+    
+    function createExplosionEffect(x, y) {
+      const gridContainer = document.getElementById('game-grid');
+      
+      // Main explosion emoji
+      const explosion = document.createElement('div');
+      explosion.style.position = 'absolute';
+      explosion.style.left = (x + 15) + 'px';
+      explosion.style.top = (y + 15) + 'px';
+      explosion.style.fontSize = '50px';
+      explosion.style.animation = 'explosion 0.8s ease-out';
+      explosion.textContent = '💥';
+      explosion.style.pointerEvents = 'none';
+      gridContainer.appendChild(explosion);
+      
+      // Particle effects
+      const particles = ['🔥', '⚡', '💫', '✨'];
+      for (let i = 0; i < 8; i++) {
+        setTimeout(() => {
+          const particle = document.createElement('div');
+          particle.style.position = 'absolute';
+          particle.style.left = (x + 20) + 'px';
+          particle.style.top = (y + 20) + 'px';
+          particle.style.fontSize = '20px';
+          particle.textContent = particles[Math.floor(Math.random() * particles.length)];
+          particle.style.pointerEvents = 'none';
+          
+          const angle = (i / 8) * Math.PI * 2;
+          const distance = 40;
+          const targetX = x + 20 + Math.cos(angle) * distance;
+          const targetY = y + 20 + Math.sin(angle) * distance;
+          
+          particle.style.transition = 'all 0.6s ease-out';
+          gridContainer.appendChild(particle);
+          
+          setTimeout(() => {
+            particle.style.left = targetX + 'px';
+            particle.style.top = targetY + 'px';
+            particle.style.opacity = '0';
+            particle.style.transform = 'scale(0)';
+          }, 10);
+          
+          setTimeout(() => particle.remove(), 700);
+        }, i * 50);
+      }
+      
+      setTimeout(() => explosion.remove(), 800);
+    }
+    
+    function shakeNPC(x, y) {
+      const npc = document.getElementById('npc-' + x + '-' + y);
+      if (npc) {
+        npc.style.animation = 'npc-shake 0.5s';
+        setTimeout(() => {
+          if (npc) npc.style.animation = '';
+        }, 500);
+      }
+    }
+
+    async function saveProgress(stars) {
+      if (progressData.length >= 999) {
+        showFeedback('⚠️ Batas maksimal 999 data progres tercapai', 'warning');
+        return;
+      }
+
+      const progressRecord = {
+        level: currentLevel,
+        stars: stars,
+        attempts: attempts,
+        blocks_used: workspace.length,
+        completed_at: new Date().toISOString()
+      };
+
+      const result = await window.dataSdk.create(progressRecord);
+      if (!result.isOk) {
+        console.error('Failed to save progress');
+      }
+    }
+
+    function updateProgressDisplay() {
+      const config = window.elementSdk?.config || defaultConfig;
+      const display = document.getElementById('progress-display');
+      
+      if (!display) return;
+      
+      if (progressData.length === 0) {
+        display.innerHTML = `<p class="body-text text-element col-span-full text-center" style="color: rgba(241, 245, 249, 0.5); font-size: ${(config.font_size || 16) * 0.9}px;">Belum ada progres tersimpan</p>`;
+        return;
+      }
+      
+      let displayHTML = '';
+      progressData.slice(-6).reverse().forEach(record => {
+        const date = new Date(record.completed_at);
+        displayHTML += `
+          <div class="p-2 rounded-lg" style="background-color: rgba(59, 130, 246, 0.1);">
+            <div class="body-text text-element font-bold mb-1" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.8}px;">
+              L${record.level}
+            </div>
+            <div class="body-text text-element mb-0.5" style="color: ${config.text_color}; font-size: ${(config.font_size || 16) * 0.8}px;">
+              ${'⭐'.repeat(record.stars)}
+            </div>
+            <div class="body-text text-element" style="color: rgba(241, 245, 249, 0.7); font-size: ${(config.font_size || 16) * 0.65}px;">
+              ${record.blocks_used} blok
+            </div>
+          </div>
+        `;
+      });
+      
+      display.innerHTML = displayHTML;
+    }
+
+    function resetLevel() {
+      attempts = 0;
+      workspace = [];
+      render();
+    }
+
+    function clearWorkspace() {
+      workspace = [];
+      renderWorkspace();
+    }
+
+    function showFeedback(message, type) {
+      const config = window.elementSdk?.config || defaultConfig;
+      const feedback = document.getElementById('feedback');
+      feedback.classList.remove('hidden');
+      
+      const colors = {
+        success: config.secondary_action_color || defaultConfig.secondary_action_color,
+        error: '#ef4444',
+        warning: '#f59e0b'
+      };
+      
+      feedback.style.backgroundColor = colors[type] || colors.warning;
+      feedback.style.color = 'white';
+      feedback.innerHTML = `<p class="body-text text-element font-bold" style="font-size: ${(config.font_size || 16) * 0.95}px;">${message}</p>`;
+    }
+
+    function hideFeedback() {
+      const feedback = document.getElementById('feedback');
+      feedback.classList.add('hidden');
+    }
+
+    initApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b9776187567e9d5',t:'MTc2NzY2MzE0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
