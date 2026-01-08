@@ -484,7 +484,7 @@
             <!-- Header & Level Info -->
             <div class="rounded-xl p-3 mb-4 shadow-lg" style="background-color: ${config.surface_color};">
               <div class="flex flex-wrap justify-between items-center gap-3">
-                <div>
+                <div class="flex-1">
                   <h1 id="game-title" class="font-bold" style="color: ${config.text_color}; font-size: ${config.font_size * 1.2}px;">
                     ${config.game_title} - ${level.title}
                   </h1>
@@ -493,6 +493,12 @@
                   </p>
                 </div>
                 <div class="flex gap-2 items-center flex-wrap">
+                  <button id="back-to-intro" class="px-3 py-1.5 rounded-lg font-bold transition-all hover:opacity-80" style="background-color: ${config.secondary_action_color}; color: white; font-size: ${config.font_size * 0.75}px;">
+                    🏠 Menu
+                  </button>
+                  <button id="show-tutorial" class="px-3 py-1.5 rounded-lg font-bold transition-all hover:opacity-80" style="background-color: #f59e0b; color: white; font-size: ${config.font_size * 0.75}px;">
+                    📚 Tutorial
+                  </button>
                   <div class="px-2.5 py-1 rounded-full" style="background-color: rgba(239, 68, 68, 0.3); color: ${config.text_color}; font-size: ${config.font_size * 0.75}px;">
                     ❤️ ${lives}
                   </div>
@@ -899,6 +905,18 @@
       document.getElementById('clear-btn').addEventListener('click', () => {
         playButtonSound();
         clearWorkspace();
+      });
+      document.getElementById('back-to-intro').addEventListener('click', () => {
+        playButtonSound();
+        gameStarted = false;
+        tutorialStep = 0;
+        renderIntro();
+      });
+      document.getElementById('show-tutorial').addEventListener('click', () => {
+        playButtonSound();
+        gameStarted = false;
+        tutorialStep = 1;
+        renderIntro();
       });
     }
 
@@ -1425,5 +1443,5 @@
 
     initApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b978a6d2271e9d5',t:'MTc2NzY2Mzk3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9baa0575c7d5e9cd',t:'MTc2Nzg1Nzc1OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
